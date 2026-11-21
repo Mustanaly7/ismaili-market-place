@@ -1,8 +1,8 @@
-import { randomUUID } from "crypto";
+import { randomUUID, createHash } from "crypto";
 import { promises as fs } from "fs";
 import path from "path";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { env, isS3Enabled } from "./env";
+import { env, isCloudinaryEnabled, isS3Enabled } from "./env";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_BYTES = 8 * 1024 * 1024; // 8 MB before optimisation
@@ -45,8 +45,44 @@ async function optimize(
 }
 
 /**
+ * Upload a buffer to Cloudinary using their signed REST API (no SDK needed).
+ * Returns the public `secure_url`.
+ */
+async function uploadToCloudinary(
+  buffer: Buffer,
+  contentType: string,
+): Promise<string> {
+  const { cloudName, apiKey, apiSecret, folder } = env.cloudinary;
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const paramsToSign = `folder=${folder}&timestamp=${timestamp}`;
+  const signature = createHash("sha1")
+    .update(paramsToSign + apiSecret)
+    .digest("hex");
+
+  const form = new URLSearchParams();
+  form.set("file", `data:${contentType};base64,${buffer.toString("base64")}`);
+  form.set("api_key", apiKey);
+  form.set("timestamp", timestamp);
+  form.set("folder", folder);
+  form.set("signature", signature);
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    { method: "POST", body: form },
+  );
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    console.error("[cloudinary] upload failed:", res.status, detail.slice(0, 300));
+    throw new Error("The photo could not be uploaded. Please try again.");
+  }
+  const json = (await res.json()) as { secure_url?: string };
+  if (!json.secure_url) throw new Error("The photo could not be uploaded. Please try again.");
+  return json.secure_url;
+}
+
+/**
  * Persist an uploaded image and return its public URL.
- * Uses S3/MinIO when configured; otherwise writes to /public/uploads.
+ * Uses Cloudinary when configured, then S3/MinIO, otherwise writes to /public/uploads.
  * Images are resized/compressed on upload for slow connections.
  */
 export async function saveImage(file: File): Promise<string> {
@@ -63,6 +99,10 @@ export async function saveImage(file: File): Promise<string> {
 
   const day = new Date().toISOString().slice(0, 10);
   const key = `uploads/${day}/${randomUUID()}.${ext}`;
+
+  if (isCloudinaryEnabled()) {
+    return uploadToCloudinary(buffer, contentType);
+  }
 
   if (isS3Enabled()) {
     const s3 = new S3Client({

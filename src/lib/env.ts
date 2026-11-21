@@ -21,6 +21,12 @@ export const env = {
     secretKey: process.env.STRIPE_SECRET_KEY ?? "",
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
   },
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME ?? "",
+    apiKey: process.env.CLOUDINARY_API_KEY ?? "",
+    apiSecret: process.env.CLOUDINARY_API_SECRET ?? "",
+    folder: process.env.CLOUDINARY_FOLDER ?? "ismaili",
+  },
   google: {
     clientId: process.env.GOOGLE_CLIENT_ID ?? "",
     clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
@@ -32,6 +38,13 @@ export const env = {
 };
 
 export const isStripeEnabled = () => Boolean(env.stripe.secretKey);
+
 export const isS3Enabled = () => Boolean(env.s3.endpoint && env.s3.accessKey);
-export const isRedisConfigured = () => Boolean(env.redisUrl);export const isGoogleEnabled = () =>
+
+export const isCloudinaryEnabled = () =>
+  Boolean(env.cloudinary.cloudName && env.cloudinary.apiKey && env.cloudinary.apiSecret);
+
+export const isRedisConfigured = () => Boolean(env.redisUrl);
+
+export const isGoogleEnabled = () =>
   Boolean(env.google.clientId && env.google.clientSecret);
