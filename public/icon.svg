@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="ISMAILI Market Place">
+  <rect width="512" height="512" rx="112" fill="#1c7e57"/>
+  <path d="M150 340V172h44l62 90 62-90h44v168h-46V246l-60 84h-2l-60-84v94z" fill="#ffffff"/>
+  <circle cx="384" cy="150" r="30" fill="#d9a038"/>
+</svg>

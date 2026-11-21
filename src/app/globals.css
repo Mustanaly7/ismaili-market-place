@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    font-family: theme("fontFamily.sans");
+  }
+
+  body {
+    @apply bg-[#fbf9f6] text-stone-900 antialiased;
+    font-size: 1rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: #b6e6cf;
+    color: #082a1f;
+  }
+
+  :focus-visible {
+    outline: 2px solid #1c7e57;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-bold tracking-tight text-stone-900;
+    letter-spacing: -0.02em;
+  }
+
+  /* Skip link for keyboard / screen-reader users. */
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 100;
+    background: #1c7e57;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 0 0 10px 0;
+    font-weight: 700;
+  }
+  .skip-link:focus {
+    left: 0;
+  }
+}
+
+@layer components {
+  /* Summary-based "Need help?" popover needs no JavaScript. */
+  .help summary {
+    list-style: none;
+    cursor: pointer;
+  }
+  .help summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* Subtle skeleton shimmer shown while an image loads. */
+  .img-shimmer {
+    background-image: linear-gradient(
+      100deg,
+      rgba(0, 0, 0, 0) 20%,
+      rgba(255, 255, 255, 0.55) 50%,
+      rgba(0, 0, 0, 0) 80%
+    );
+    background-size: 200% 100%;
+    @apply animate-shimmer;
+  }
+
+  .glass {
+    background-color: rgba(255, 255, 255, 0.82);
+    backdrop-filter: saturate(180%) blur(14px);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
